@@ -1,0 +1,305 @@
+/* ============================================
+   Neon Tic Tac Toe — styles.css
+   Simple, readable, modern CSS.
+   Uses CSS variables + Flexbox + Grid.
+   ============================================ */
+
+:root {
+  --bg: #0a0e27;
+  --card: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.12);
+  --text: #f1f5ff;
+  --muted: #8b93b8;
+  --x-color: #22d3ee;
+  --o-color: #fb7185;
+  --accent: #a78bfa;
+  --radius: 20px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Outfit', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 32px 16px;
+  overflow-x: hidden;
+}
+
+/* --- Animated background --- */
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.blob {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.35;
+  animation: float 12s ease-in-out infinite alternate;
+}
+
+.blob-1 { background: #6d28d9; top: -150px; left: -100px; }
+.blob-2 { background: #0891b2; bottom: -150px; right: -100px; animation-delay: -4s; }
+.blob-3 { background: #db2777; top: 40%; left: 60%; width: 300px; height: 300px; animation-delay: -8s; }
+
+@keyframes float {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(60px, 40px) scale(1.15); }
+}
+
+/* --- Layout --- */
+.container {
+  width: 100%;
+  max-width: 460px;
+  text-align: center;
+}
+
+.header .title {
+  font-size: 3rem;
+  font-weight: 900;
+  letter-spacing: 4px;
+}
+
+.header .title span {
+  background: linear-gradient(90deg, var(--x-color), var(--accent), var(--o-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin: 6px 0 20px;
+}
+
+/* --- Scoreboard --- */
+.scoreboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.score-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 8px;
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.score-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+.score-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.score-x .score-value { color: var(--x-color); }
+.score-o .score-value { color: var(--o-color); }
+
+/* --- Controls --- */
+.controls {
+  margin-bottom: 12px;
+}
+
+.mode-toggle {
+  display: flex;
+  gap: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 6px;
+  border-radius: 999px;
+}
+
+.pill {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pill.active {
+  background: white;
+  color: #111;
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25);
+}
+
+.difficulty {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  color: var(--muted);
+}
+
+.hidden { display: none !important; }
+
+/* --- Status --- */
+.status {
+  margin: 12px 0;
+  font-size: 1.15rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  backdrop-filter: blur(12px);
+}
+
+/* --- Board --- */
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.cell {
+  aspect-ratio: 1;
+  font-size: 3rem;
+  font-weight: 900;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.2s ease;
+}
+
+.cell:hover:empty {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.03);
+}
+
+.cell.x { color: var(--x-color); text-shadow: 0 0 20px rgba(34, 211, 238, 0.7); }
+.cell.o { color: var(--o-color); text-shadow: 0 0 20px rgba(251, 113, 133, 0.7); }
+
+/* Pop-in animation for new moves */
+.cell.pop { animation: pop 0.25s ease; }
+
+@keyframes pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Highlight winning cells */
+.cell.win {
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.35), rgba(34, 211, 238, 0.25));
+  border-color: var(--accent);
+  animation: glow 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from { box-shadow: 0 0 10px rgba(167, 139, 250, 0.4); }
+  to { box-shadow: 0 0 25px rgba(167, 139, 250, 0.9); }
+}
+
+/* --- Buttons --- */
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.btn {
+  flex: 1;
+  padding: 13px;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.15s ease, opacity 0.15s;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: linear-gradient(90deg, #22d3ee, #a78bfa, #fb7185);
+  color: #0a0e27;
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.footer {
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* --- Win modal --- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 25, 0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.25s ease;
+}
+
+.modal {
+  background: #141a3a;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 32px;
+  max-width: 340px;
+  width: 100%;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+}
+
+.modal h2 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.modal p { color: var(--muted); margin-bottom: 18px; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* --- Mobile --- */
+@media (max-width: 420px) {
+  .header .title { font-size: 2.2rem; }
+  .cell { font-size: 2.4rem; }
+}
