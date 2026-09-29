@@ -82,31 +82,38 @@ function playShoutNoise(delaySec, lengthSec, volume = 0.35) {
   }
 }
 
-// Short click on every move
+// Short click on every move — DISABLED (only win/lose shouts now)
 function playClick() {
-  playTone(600, 0, 0.08, "square", 0.12);
+  // intentionally silent
 }
 
-// LOUD WIN SHOUT: "WHEY!" — rising scream + crowd noise
+// MAXIMUM LOUD WIN SHOUT — airhorn spam, instantly mute-worthy
 function playWinSound() {
-  playShoutNoise(0, 0.7, 0.4);
-  playTone(400, 0, 0.2, "sawtooth", 0.45);
-  playTone(600, 0.15, 0.2, "sawtooth", 0.45);
-  playTone(900, 0.3, 0.4, "sawtooth", 0.5);
+  // 4x ultra-loud airhorn blasts
+  for (let i = 0; i < 4; i++) {
+    const t = i * 0.35;
+    playTone(466, t, 0.32, "sawtooth", 0.9); // airhorn tone 1
+    playTone(622, t, 0.32, "sawtooth", 0.9); // airhorn tone 2
+    playTone(933, t, 0.32, "square", 0.7);   // harsh top layer
+    playShoutNoise(t, 0.32, 0.8);
+  }
+  // Final long scream
+  playTone(1000, 1.4, 0.6, "sawtooth", 0.9);
+  playShoutNoise(1.4, 0.6, 0.8);
 }
 
-// LOUD LOSE SHOUT: "BOOO!" — low descending groan + noise
+// MAXIMUM LOUD LOSE SHOUT — foghorn fail spam
 function playLoseSound() {
-  playShoutNoise(0, 0.8, 0.4);
-  playTone(300, 0, 0.25, "sawtooth", 0.45);
-  playTone(220, 0.2, 0.25, "sawtooth", 0.45);
-  playTone(150, 0.4, 0.4, "sawtooth", 0.5);
-}
-
-// LOUD DRAW SHOUT: short "HEY!"
-function playDrawSound() {
-  playShoutNoise(0, 0.4, 0.35);
-  playTone(500, 0, 0.3, "square", 0.4);
+  // 4x ultra-loud descending blasts
+  for (let i = 0; i < 4; i++) {
+    const t = i * 0.35;
+    playTone(220, t, 0.32, "sawtooth", 0.9);
+    playTone(110, t, 0.32, "sawtooth", 0.9);
+    playTone(165, t, 0.32, "square", 0.7);
+    playShoutNoise(t, 0.32, 0.8);
+  }
+  playTone(80, 1.4, 0.7, "sawtooth", 0.9);
+  playShoutNoise(1.4, 0.7, 0.8);
 }
 
 const scoreX = document.getElementById("scoreX");
@@ -140,7 +147,6 @@ cells.forEach((cell) => {
 // Place a mark on the board
 function makeMove(index, player) {
   board[index] = player;
-  playClick();
 
   const cell = document.querySelector(`[data-index="${index}"]`);
   cell.textContent = player;
@@ -171,6 +177,7 @@ function getWinnerCombo() {
 }
 
 // Handle win or draw
+// Sounds ONLY play on win/lose in vsComputer mode. No click, no draw, no 2P sound.
 function endGame(result, winnerCombo) {
   gameActive = false;
 
@@ -178,7 +185,7 @@ function endGame(result, winnerCombo) {
     scores.Draw++;
     statusText.innerHTML = `It's a <strong>draw</strong>! 🤝`;
     showModal("Draw! 🤝");
-    playDrawSound();
+    // no sound on draw
   } else {
     scores[result]++;
     // Highlight winning cells
@@ -190,14 +197,12 @@ function endGame(result, winnerCombo) {
     statusText.innerHTML = `Player <strong>${result}</strong> wins! 🎉`;
     showModal(`${result} Wins! 🎉`);
 
-    // Fun sounds: vs Computer → win = cheer, lose = sad.
-    // 2 Players → always cheer.
+    // ONLY vs Computer: X = you win, O = you lose. Max loud.
     if (gameMode === "vsComputer") {
-      if (result === "O") playLoseSound(); // computer beat you
-      else playWinSound(); // you beat computer
-    } else {
-      playWinSound();
+      if (result === "O") playLoseSound(); // you lost
+      else playWinSound(); // you won
     }
+    // 2 Players mode = silent
   }
 
   updateScores();
