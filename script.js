@@ -28,6 +28,63 @@ const statusText = document.getElementById("status");
 const overlay = document.getElementById("overlay");
 const winnerText = document.getElementById("winnerText");
 
+// --- 2b. Fun sound effects (Web Audio, no files needed) ---
+let soundOn = true;
+let audioCtx = null;
+
+// Create AudioContext on first user interaction (browser rule)
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+
+// Play one beep tone
+function playTone(freq, delaySec, lengthSec, type = "sine", volume = 0.2) {
+  if (!soundOn) return;
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.value = volume;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    const start = ctx.currentTime + delaySec;
+    osc.start(start);
+    osc.stop(start + lengthSec);
+  } catch (e) {
+    // Audio not supported — ignore silently
+  }
+}
+
+// Short click on every move
+function playClick() {
+  playTone(600, 0, 0.08, "square", 0.08);
+}
+
+// Happy ascending fanfare for WIN
+function playWinSound() {
+  playTone(523, 0, 0.15, "sine", 0.25);    // C5
+  playTone(659, 0.15, 0.15, "sine", 0.25); // E5
+  playTone(784, 0.3, 0.15, "sine", 0.25);  // G5
+  playTone(1047, 0.45, 0.3, "sine", 0.3);  // C6
+}
+
+// Sad descending wah-wah for LOSE
+function playLoseSound() {
+  playTone(400, 0, 0.2, "sawtooth", 0.15);
+  playTone(300, 0.2, 0.2, "sawtooth", 0.15);
+  playTone(200, 0.4, 0.4, "sawtooth", 0.15);
+}
+
+// Neutral sound for DRAW
+function playDrawSound() {
+  playTone(440, 0, 0.15, "triangle", 0.2);
+  playTone(440, 0.2, 0.15, "triangle", 0.2);
+}
+
 const scoreX = document.getElementById("scoreX");
 const scoreO = document.getElementById("scoreO");
 const scoreDraw = document.getElementById("scoreDraw");
@@ -59,6 +116,7 @@ cells.forEach((cell) => {
 // Place a mark on the board
 function makeMove(index, player) {
   board[index] = player;
+  playClick();
 
   const cell = document.querySelector(`[data-index="${index}"]`);
   cell.textContent = player;
@@ -96,6 +154,7 @@ function endGame(result, winnerCombo) {
     scores.Draw++;
     statusText.innerHTML = `It's a <strong>draw</strong>! 🤝`;
     showModal("Draw! 🤝");
+    playDrawSound();
   } else {
     scores[result]++;
     // Highlight winning cells
@@ -106,6 +165,15 @@ function endGame(result, winnerCombo) {
     }
     statusText.innerHTML = `Player <strong>${result}</strong> wins! 🎉`;
     showModal(`${result} Wins! 🎉`);
+
+    // Fun sounds: vs Computer → win = cheer, lose = sad.
+    // 2 Players → always cheer.
+    if (gameMode === "vsComputer") {
+      if (result === "O") playLoseSound(); // computer beat you
+      else playWinSound(); // you beat computer
+    } else {
+      playWinSound();
+    }
   }
 
   updateScores();
@@ -242,6 +310,12 @@ function resetScores() {
 document.getElementById("btnRestart").addEventListener("click", restartRound);
 document.getElementById("btnResetScore").addEventListener("click", resetScores);
 document.getElementById("btnPlayAgain").addEventListener("click", restartRound);
+
+// Sound on/off toggle
+document.getElementById("btnSound").addEventListener("click", (e) => {
+  soundOn = !soundOn;
+  e.target.textContent = soundOn ? "🔊 Sound" : "🔇 Muted";
+});
 
 btn2P.addEventListener("click", () => {
   gameMode = "twoPlayer";
