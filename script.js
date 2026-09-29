@@ -177,7 +177,7 @@ function getWinnerCombo() {
 }
 
 // Handle win or draw
-// Sounds ONLY play on win/lose in vsComputer mode. No click, no draw, no 2P sound.
+// Sounds ONLY play on win/lose. No click, no draw.
 function endGame(result, winnerCombo) {
   gameActive = false;
 
@@ -197,12 +197,14 @@ function endGame(result, winnerCombo) {
     statusText.innerHTML = `Player <strong>${result}</strong> wins! 🎉`;
     showModal(`${result} Wins! 🎉`);
 
-    // ONLY vs Computer: X = you win, O = you lose. Max loud.
+    // vs Computer: X = you win, O = you lose. Max loud.
+    // 2 Players: any win = loud win shout.
     if (gameMode === "vsComputer") {
       if (result === "O") playLoseSound(); // you lost
       else playWinSound(); // you won
+    } else {
+      playWinSound();
     }
-    // 2 Players mode = silent
   }
 
   updateScores();
