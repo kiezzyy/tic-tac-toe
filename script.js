@@ -342,10 +342,40 @@ document.getElementById("btnRestart").addEventListener("click", restartRound);
 document.getElementById("btnResetScore").addEventListener("click", resetScores);
 document.getElementById("btnPlayAgain").addEventListener("click", restartRound);
 
-// Sound on/off toggle
-document.getElementById("btnSound").addEventListener("click", (e) => {
-  soundOn = !soundOn;
-  e.target.textContent = soundOn ? "🔊 Sound" : "🔇 Muted";
+// Sound button → fake paywall if trying to mute
+const btnSound = document.getElementById("btnSound");
+const payOverlay = document.getElementById("payOverlay");
+
+btnSound.addEventListener("click", () => {
+  // If sound is ON and they want to mute → show joke paywall
+  if (soundOn) {
+    payOverlay.classList.remove("hidden");
+  } else {
+    // Already muted → unmute for free
+    soundOn = true;
+    btnSound.textContent = "🔊 Sound";
+  }
+});
+
+// Fake "Pay $0.99" button — just a joke, mutes after fake processing
+document.getElementById("btnPay").addEventListener("click", (e) => {
+  e.target.textContent = "Processing... ⏳";
+  setTimeout(() => {
+    soundOn = false;
+    btnSound.textContent = "🔇 Muted";
+    payOverlay.classList.add("hidden");
+    e.target.textContent = "💳 Pay $0.99";
+  }, 1000);
+});
+
+// "Suffer" button — close paywall, keep the loud shouts
+document.getElementById("btnNoPay").addEventListener("click", () => {
+  payOverlay.classList.add("hidden");
+});
+
+// Close paywall when clicking outside
+payOverlay.addEventListener("click", (e) => {
+  if (e.target === payOverlay) payOverlay.classList.add("hidden");
 });
 
 btn2P.addEventListener("click", () => {
