@@ -28,7 +28,7 @@ const statusText = document.getElementById("status");
 const overlay = document.getElementById("overlay");
 const winnerText = document.getElementById("winnerText");
 
-// --- 2b. Fun sound effects (Web Audio, no files needed) ---
+// --- 2b. Loud shout sounds (Web Audio, no files needed) ---
 let soundOn = true;
 let audioCtx = null;
 
@@ -39,8 +39,8 @@ function getAudio() {
   return audioCtx;
 }
 
-// Play one beep tone
-function playTone(freq, delaySec, lengthSec, type = "sine", volume = 0.2) {
+// Play one loud tone
+function playTone(freq, delaySec, lengthSec, type = "sawtooth", volume = 0.4) {
   if (!soundOn) return;
   try {
     const ctx = getAudio();
@@ -59,30 +59,54 @@ function playTone(freq, delaySec, lengthSec, type = "sine", volume = 0.2) {
   }
 }
 
+// Play loud crowd-like noise burst (sounds like shouting)
+function playShoutNoise(delaySec, lengthSec, volume = 0.35) {
+  if (!soundOn) return;
+  try {
+    const ctx = getAudio();
+    const bufferSize = ctx.sampleRate * lengthSec;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1; // white noise
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const gain = ctx.createGain();
+    gain.gain.value = volume;
+    noise.connect(gain);
+    gain.connect(ctx.destination);
+    noise.start(ctx.currentTime + delaySec);
+  } catch (e) {
+    // ignore
+  }
+}
+
 // Short click on every move
 function playClick() {
-  playTone(600, 0, 0.08, "square", 0.08);
+  playTone(600, 0, 0.08, "square", 0.12);
 }
 
-// Happy ascending fanfare for WIN
+// LOUD WIN SHOUT: "WHEY!" — rising scream + crowd noise
 function playWinSound() {
-  playTone(523, 0, 0.15, "sine", 0.25);    // C5
-  playTone(659, 0.15, 0.15, "sine", 0.25); // E5
-  playTone(784, 0.3, 0.15, "sine", 0.25);  // G5
-  playTone(1047, 0.45, 0.3, "sine", 0.3);  // C6
+  playShoutNoise(0, 0.7, 0.4);
+  playTone(400, 0, 0.2, "sawtooth", 0.45);
+  playTone(600, 0.15, 0.2, "sawtooth", 0.45);
+  playTone(900, 0.3, 0.4, "sawtooth", 0.5);
 }
 
-// Sad descending wah-wah for LOSE
+// LOUD LOSE SHOUT: "BOOO!" — low descending groan + noise
 function playLoseSound() {
-  playTone(400, 0, 0.2, "sawtooth", 0.15);
-  playTone(300, 0.2, 0.2, "sawtooth", 0.15);
-  playTone(200, 0.4, 0.4, "sawtooth", 0.15);
+  playShoutNoise(0, 0.8, 0.4);
+  playTone(300, 0, 0.25, "sawtooth", 0.45);
+  playTone(220, 0.2, 0.25, "sawtooth", 0.45);
+  playTone(150, 0.4, 0.4, "sawtooth", 0.5);
 }
 
-// Neutral sound for DRAW
+// LOUD DRAW SHOUT: short "HEY!"
 function playDrawSound() {
-  playTone(440, 0, 0.15, "triangle", 0.2);
-  playTone(440, 0.2, 0.15, "triangle", 0.2);
+  playShoutNoise(0, 0.4, 0.35);
+  playTone(500, 0, 0.3, "square", 0.4);
 }
 
 const scoreX = document.getElementById("scoreX");
